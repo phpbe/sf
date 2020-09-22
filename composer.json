@@ -1,0 +1,29 @@
+{
+    "name": "be/sf",
+    "type": "library",
+    "description": "PHP BE 服务框架（Service Framework）",
+    "keywords": ["PHP", "Be", "Beyond Exception", "Service", "Framework", "服务框架"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "liu12",
+            "email": "i@liu12.com",
+            "homepage": "http://www.liu12.com/"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "phpmailer/phpmailer": "~6.0",
+        "monolog/monolog": "~1.11",
+        "phpoffice/phpspreadsheet": "^1.8",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Be\\System\\": "src/System"
+        },
+        "files": [
+            "src/System/functions.php"
+        ]
+    }
+}
