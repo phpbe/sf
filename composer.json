@@ -12,18 +12,14 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0",
-        "phpmailer/phpmailer": "~6.0",
-        "monolog/monolog": "~1.11",
-        "phpoffice/phpspreadsheet": "^1.8",
-        "ext-json": "*"
+        "be/f": "^2.1",
+        "be/f-cache": "^2.1",
+        "be/f-db": "^2.1",
+        "be/f-lib": "^2.1"
     },
     "autoload": {
         "psr-4": {
-            "Be\\System\\": "src/System"
-        },
-        "files": [
-            "src/System/functions.php"
-        ]
+            "Be\\Sf\\": "src"
+        }
     }
 }
