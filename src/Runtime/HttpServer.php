@@ -45,8 +45,13 @@ class HttpServer
             /**
              * @var \Swoole\Http\Response $swResponse
              */
-            $swResponse->header('Server', 'BE/MF', false);
+            $swResponse->header('Server', 'be/sf', false);
             $uri = $swRequest->server['request_uri'];
+
+            if ($uri == '/favicon.ico') {
+                $swResponse->sendfile(Be::getRuntime()->getRootPath() . '/favicon.ico');
+                return true;
+            }
 
             $swRequest->request = null;
             if ($swRequest->get !== null) {
