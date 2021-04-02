@@ -19,13 +19,17 @@ class HttpServer
      */
     private $swooleHttpServer = null;
 
+    /**
+     * @var \Swoole\Server\Port
+     */
+    private $swooleServerPort = null;
+
     public function __construct()
     {
     }
 
     public function start()
     {
-
         if ($this->swooleHttpServer !== null) {
             return;
         }
@@ -41,27 +45,26 @@ class HttpServer
         $configSystem = Be::getConfig('System.System');
         date_default_timezone_set($configSystem->timezone);
 
-
-        $this->swooleHttpServer = new \Swoole\Http\Server($configServer->host, $configServer->port);
+        $this->swooleHttpServer = new \Swoole\Http\Server($configServer->http_host, $configServer->http_port);
 
         $setting = [
             'enable_coroutine' => true,
         ];
 
-        if ($configServer->http_reactor_num > 0) {
-            $setting['reactor_num'] = $configServer->http_reactor_num;
+        if ($configServer->reactor_num > 0) {
+            $setting['reactor_num'] = $configServer->reactor_num;
         }
 
-        if ($configServer->http_worker_num > 0) {
-            $setting['worker_num'] = $configServer->http_worker_num;
+        if ($configServer->worker_num > 0) {
+            $setting['worker_num'] = $configServer->worker_num;
         }
 
-        if ($configServer->http_max_request > 0) {
-            $setting['max_request'] = $configServer->http_max_request;
+        if ($configServer->max_request > 0) {
+            $setting['max_request'] = $configServer->max_request;
         }
 
-        if ($configServer->http_max_conn > 0) {
-            $setting['max_conn'] = $configServer->http_max_conn;
+        if ($configServer->max_conn > 0) {
+            $setting['max_conn'] = $configServer->max_conn;
         }
 
         $this->swooleHttpServer->set($setting);
@@ -69,11 +72,17 @@ class HttpServer
         // 初始化数据库，Redis连接池
         DbFactory::init();
         RedisFactory::init();
-//
-//        if ($configServer->clearCacheOnStart) {
-//            $dir = RuntimeFactory::getInstance()->getCachePath();
-//            \Be\F\Util\FileSystem\Dir::rm($dir);
-//        }
+
+        if ($configServer->clearCacheOnStart) {
+            $dir = RuntimeFactory::getInstance()->getCachePath();
+            \Be\F\Util\FileSystem\Dir::rm($dir);
+        } else {
+            $sessionConfig = ConfigFactory::getInstance('System.Session');
+            if ($sessionConfig->driver == 'File') {
+                $dir = RuntimeFactory::getInstance()->getCachePath() . '/session';
+                \Be\F\Util\FileSystem\Dir::rm($dir);
+            }
+        }
 
         $this->swooleHttpServer->on('request', function ($swRequest, $swResponse) {
             /**
@@ -190,6 +199,49 @@ class HttpServer
             return true;
         });
 
+        $this->swooleServerPort = $this->swooleHttpServer->listen($configServer->tcp_host, $configServer->tcp_port, SWOOLE_SOCK_TCP);
+        $this->swooleServerPort->set(array());
+        $this->swooleServerPort->on('Receive', function ($server, $fd, $reactorId, $data) {
+            try {
+                $data = json_decode($data, true);
+
+                if (!isset($data['service'])) {
+                    throw new RuntimeException('参数（service）缺失！');
+                }
+
+                if (!isset($data['method'])) {
+                    throw new RuntimeException('参数（method）缺失！');
+                }
+
+                if (!isset($data['params'])) {
+                    throw new RuntimeException('参数（params）缺失！');
+                }
+
+                $service = $data['service'];
+                $method = $data['method'];
+                $params = $data['params'];
+
+                $service = Be::getService($service);
+                $result = $service->$method(...$params);
+
+                $server->send($fd, json_encode([
+                    'success' => true,
+                    'message' => '',
+                    'data' => $result
+                ]));
+                $server->close($fd);
+
+            } catch (\Throwable $t) {
+                Be::getLog()->emergency($t);
+
+                $server->send($fd, \Swoole\Serialize::pack([
+                    'success' => false,
+                    'message' => $t->getMessage(),
+                ]));
+                $server->close($fd);
+            }
+        });
+
         $this->swooleHttpServer->start();
     }
 
@@ -208,5 +260,9 @@ class HttpServer
     {
         return $this->swooleHttpServer;
     }
-    
+
+    public function getSwooleServerPort()
+    {
+        return $this->swooleServerPort;
+    }
 }

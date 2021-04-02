@@ -9,7 +9,7 @@ use Be\F\Db\TableFactory;
 use Be\F\Db\TablePropertyFactory;
 use Be\F\Db\TupleFactory;
 use Be\F\Lib\LibFactory;
-use Be\F\Logger\LoggerFactory;
+use Be\F\Log\LogFactory;
 use Be\F\Property\PropertyFactory;
 use Be\F\Request\RequestFactory;
 use Be\F\Response\ResponseFactory;
@@ -248,7 +248,7 @@ abstract class Be
         foreach ([
                      '\\Be\\F\\Request\\RequestFactory',
                      '\\Be\\F\\Response\\ResponseFactory',
-                     '\\Be\\F\\Logger\\LoggerFactory',
+                     '\\Be\\F\\Log\\LogFactory',
                      '\\Be\\F\\Cache\\CacheFactory',
                      '\\Be\\F\\Db\\TableFactory',
                      '\\Be\\F\\Db\\TupleFactory',

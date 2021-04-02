@@ -1,5 +1,5 @@
 <?php
-namespace Be\Mf\App\System\Config;
+namespace Be\Sf\App\System\Config;
 
 /**
  * @BeConfig("服务器")
@@ -20,34 +20,6 @@ class Server
     public $rpc_port = 10240;
 
     /**
-     * @BeConfigItem("RPC Reactor线程数",
-     *     driver="FormItemInputNumberInt",
-     *     ui="return [':min' => 0];")
-     */
-    public $rpc_reactor_num = 0;
-
-    /**
-     * @BeConfigItem("RPC Worker进程数",
-     *     driver="FormItemInputNumberInt",
-     *     ui="return [':min' => 0];")
-     */
-    public $rpc_worker_num = 0;
-
-    /**
-     * @BeConfigItem("RPC Worker进程最大任务数",
-     *     driver="FormItemInputNumberInt",
-     *     ui="return [':min' => 0];")
-     */
-    public $rpc_max_request = 0;
-
-    /**
-     * @BeConfigItem("RPC 最大连接数",
-     *     driver="FormItemInputNumberInt",
-     *     ui="return [':min' => 0];")
-     */
-    public $rpc_max_conn = 0;
-
-    /**
      * @BeConfigItem("Http 监听的IP地址", driver="FormItemInput")
      */
     public $http_host = '0.0.0.0';
@@ -64,28 +36,28 @@ class Server
      *     driver="FormItemInputNumberInt",
      *     ui="return [':min' => 0];")
      */
-    public $http_reactor_num = 0;
+    public $reactor_num = 0;
 
     /**
      * @BeConfigItem("Http Worker进程数",
      *     driver="FormItemInputNumberInt",
      *     ui="return [':min' => 0];")
      */
-    public $http_worker_num = 0;
+    public $worker_num = 0;
 
     /**
      * @BeConfigItem("Http Worker进程最大任务数",
      *     driver="FormItemInputNumberInt",
      *     ui="return [':min' => 0];")
      */
-    public $http_max_request = 0;
+    public $max_request = 0;
 
     /**
      * @BeConfigItem("Http 最大连接数",
      *     driver="FormItemInputNumberInt",
      *     ui="return [':min' => 0];")
      */
-    public $http_max_conn = 0;
+    public $max_conn = 0;
 
     /**
      * @BeConfigItem("启动时清空Cache", driver="FormItemSwitch")
