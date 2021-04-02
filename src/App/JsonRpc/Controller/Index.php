@@ -1,11 +1,12 @@
 <?php
 
-namespace Be\Sf\App\System\Controller;
+namespace Be\Sf\App\JsonRpc\Controller;
 
 
+use Be\F\App\ControllerException;
 use Be\Sf\Be;
 
-class JsonRPC
+class Index
 {
 
     const ERR_PARSE = -32700;
@@ -14,6 +15,14 @@ class JsonRPC
     const ERR_PARAMS = -32602;
     const ERR_INTERNAL = -32603;
     const ERR_SERVER = -32000;
+
+    public function __construct()
+    {
+        $configServer = Be::getConfig('System.Server');
+        if (!$configServer->jsonRpc) {
+            throw new ControllerException('JsonRpc 未启用');
+        }
+    }
 
     public function index()
     {
@@ -42,7 +51,7 @@ class JsonRPC
         }
     }
 
-    public function handle($inputData)
+    private function handle($inputData)
     {
         $inputArray = $this->obj2Arr($inputData);
         $id = false;
@@ -76,7 +85,7 @@ class JsonRPC
     }
 
 
-    public function success($id, $result)
+    private function success($id, $result)
     {
         if ($id === false) return false;
 
@@ -87,7 +96,7 @@ class JsonRPC
         ];
     }
 
-    public function error($id, $code, $message = null)
+    private function error($id, $code, $message = null)
     {
         if ($id === false) return false;
 
@@ -127,7 +136,7 @@ class JsonRPC
         ];
     }
 
-    public function obj2Arr($obj)
+    private function obj2Arr($obj)
     {
         $arr = (array)$obj;
         foreach ($arr as $k => $v) {

@@ -2,11 +2,13 @@
 
 namespace Be\Sf\Runtime;
 
+use Be\F\Config\ConfigFactory;
 use Be\F\Db\DbFactory;
 use Be\F\Redis\RedisFactory;
 use Be\F\Request\RequestFactory;
 use Be\F\Response\ResponseFactory;
 use Be\F\Runtime\RuntimeException;
+use Be\F\Runtime\RuntimeFactory;
 use Be\Sf\Be;
 
 class HttpServer
@@ -15,16 +17,21 @@ class HttpServer
     /**
      * @var \Swoole\Http\Server
      */
-    private $server = null;
+    private $swooleHttpServer = null;
 
     public function __construct()
     {
     }
 
-
     public function start()
     {
-        if ($this->server !== null) {
+
+        if ($this->swooleHttpServer !== null) {
+            return;
+        }
+
+        $configServer = ConfigFactory::getInstance('System.Server');
+        if (!$configServer->admin && !!$configServer->jsonRpc) {
             return;
         }
 
@@ -34,14 +41,41 @@ class HttpServer
         $configSystem = Be::getConfig('System.System');
         date_default_timezone_set($configSystem->timezone);
 
-        $this->server = new \Swoole\Http\Server("0.0.0.0", 80);
-        $this->server->set(['enable_coroutine' => true]);
+
+        $this->swooleHttpServer = new \Swoole\Http\Server($configServer->host, $configServer->port);
+
+        $setting = [
+            'enable_coroutine' => true,
+        ];
+
+        if ($configServer->http_reactor_num > 0) {
+            $setting['reactor_num'] = $configServer->http_reactor_num;
+        }
+
+        if ($configServer->http_worker_num > 0) {
+            $setting['worker_num'] = $configServer->http_worker_num;
+        }
+
+        if ($configServer->http_max_request > 0) {
+            $setting['max_request'] = $configServer->http_max_request;
+        }
+
+        if ($configServer->http_max_conn > 0) {
+            $setting['max_conn'] = $configServer->http_max_conn;
+        }
+
+        $this->swooleHttpServer->set($setting);
 
         // 初始化数据库，Redis连接池
         DbFactory::init();
         RedisFactory::init();
+//
+//        if ($configServer->clearCacheOnStart) {
+//            $dir = RuntimeFactory::getInstance()->getCachePath();
+//            \Be\F\Util\FileSystem\Dir::rm($dir);
+//        }
 
-        $this->server->on('request', function ($swRequest, $swResponse) {
+        $this->swooleHttpServer->on('request', function ($swRequest, $swResponse) {
             /**
              * @var \Swoole\Http\Response $swResponse
              */
@@ -149,26 +183,30 @@ class HttpServer
 
             } catch (\Throwable $t) {
                 $response->end($t->getMessage());
-                Be::getLogger()->emergency($t);
+                Be::getLog()->emergency($t);
             }
 
             Be::release();
             return true;
         });
 
-        $this->server->start();
+        $this->swooleHttpServer->start();
     }
 
 
     public function stop()
     {
-        $this->server->stop();
+        $this->swooleHttpServer->stop();
     }
-
 
     public function reload()
     {
-        $this->server->reload();
+        $this->swooleHttpServer->reload();
     }
 
+    public function getSwooleHttpServer()
+    {
+        return $this->swooleHttpServer;
+    }
+    
 }

@@ -81,11 +81,11 @@ abstract class Be
     /**
      * 获取日志记录器
      *
-     * @return \Be\F\Logger\Driver
+     * @return \Be\F\Log\Driver
      */
-    public static function getLogger()
+    public static function getLog()
     {
-        return LoggerFactory::getInstance();
+        return LogFactory::getInstance();
     }
 
     /**
