@@ -8,14 +8,17 @@ use Be\F\Db\DbFactory;
 use Be\F\Db\TableFactory;
 use Be\F\Db\TablePropertyFactory;
 use Be\F\Db\TupleFactory;
+use Be\F\Es\EsFactory;
 use Be\F\Lib\LibFactory;
 use Be\F\Log\LogFactory;
 use Be\F\Property\PropertyFactory;
+use Be\F\Redis\RedisFactory;
 use Be\F\Request\RequestFactory;
 use Be\F\Response\ResponseFactory;
 use Be\F\Runtime\RuntimeFactory;
 use Be\F\Runtime\RuntimeException;
 use Be\F\App\ServiceFactory;
+use Be\F\Session\SessionFactory;
 
 
 /**
@@ -101,6 +104,16 @@ abstract class Be
     }
 
     /**
+     * 获取SESSION
+     *
+     * @return \Be\F\Session\Driver
+     */
+    public static function getSession()
+    {
+        return SessionFactory::getInstance();
+    }
+
+    /**
      * 获取Cache
      *
      * @return \Be\F\Cache\Driver
@@ -108,6 +121,52 @@ abstract class Be
     public static function getCache()
     {
         return CacheFactory::getInstance();
+    }
+
+    /**
+     * 获取Redis对象
+     *
+     * @param string $name Redis名
+     * @return \Be\F\Redis\Driver
+     * @throws RuntimeException
+     */
+    public static function getRedis($name = 'master')
+    {
+        return RedisFactory::getInstance($name);
+    }
+
+    /**
+     * 新创建一个Redis对象
+     *
+     * @param string $name Redis名
+     * @return \Be\F\Redis\Driver
+     * @throws RuntimeException
+     */
+    public static function newRedis($name = 'master')
+    {
+        return RedisFactory::newInstance($name);
+    }
+
+    /**
+     * 获取ES对象
+     *
+     * @return \Elasticsearch\Client
+     * @throws RuntimeException
+     */
+    public static function getEs()
+    {
+        return EsFactory::getInstance();
+    }
+
+    /**
+     * 新创建一个ES对象
+     *
+     * @return \Elasticsearch\Client
+     * @throws RuntimeException
+     */
+    public static function newEs()
+    {
+        return EsFactory::newInstance();
     }
 
     /**
@@ -249,11 +308,14 @@ abstract class Be
                      '\\Be\\F\\Request\\RequestFactory',
                      '\\Be\\F\\Response\\ResponseFactory',
                      '\\Be\\F\\Log\\LogFactory',
+                     '\\Be\\F\\Session\\SessionFactory',
                      '\\Be\\F\\Cache\\CacheFactory',
+                     '\\Be\\F\\Es\\EsFactory',
                      '\\Be\\F\\Db\\TableFactory',
                      '\\Be\\F\\Db\\TupleFactory',
                      '\\Be\\F\\App\\ServiceFactory',
                      '\\Be\\F\\Lib\\LibFactory',
+                     '\\Be\\F\\Template\\TemplateFactory',
 
                      '\\Be\\F\\Db\\DbFactory',
                      '\\Be\\F\\Redis\\RedisFactory',
@@ -261,4 +323,5 @@ abstract class Be
             $factoryClass::release();
         }
     }
+
 }
