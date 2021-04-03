@@ -11,7 +11,7 @@ class Test
     public function test()
     {
         return [
-            'test' => 'Success！',
+            'test' => 'Success!',
         ];
     }
 

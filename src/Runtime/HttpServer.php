@@ -199,47 +199,55 @@ class HttpServer
             return true;
         });
 
-        $this->swooleServerPort = $this->swooleHttpServer->listen($configServer->tcp_host, $configServer->tcp_port, SWOOLE_SOCK_TCP);
+        $this->swooleServerPort = $this->swooleHttpServer->addListener($configServer->rpc_host, $configServer->rpc_port, SWOOLE_SOCK_TCP);
         $this->swooleServerPort->set(array());
         $this->swooleServerPort->on('Receive', function ($server, $fd, $reactorId, $data) {
-            try {
-                $data = json_decode($data, true);
-
-                if (!isset($data['service'])) {
-                    throw new RuntimeException('参数（service）缺失！');
-                }
-
-                if (!isset($data['method'])) {
-                    throw new RuntimeException('参数（method）缺失！');
-                }
-
-                if (!isset($data['params'])) {
-                    throw new RuntimeException('参数（params）缺失！');
-                }
-
-                $service = $data['service'];
-                $method = $data['method'];
-                $params = $data['params'];
-
-                $service = Be::getService($service);
-                $result = $service->$method(...$params);
-
+            $calls = json_decode($data, true);
+            if (!is_array($calls)) {
                 $server->send($fd, json_encode([
-                    'success' => true,
-                    'message' => '',
-                    'data' => $result
-                ]));
-                $server->close($fd);
-
-            } catch (\Throwable $t) {
-                Be::getLog()->emergency($t);
-
-                $server->send($fd, \Swoole\Serialize::pack([
                     'success' => false,
-                    'message' => $t->getMessage(),
+                    'message' => '参数非数组格式！',
                 ]));
-                $server->close($fd);
+                return;
             }
+
+            $results = [];
+            foreach ($calls as $call) {
+                $id = null;
+                try {
+                    if (!isset($call['service'])) {
+                        throw new RuntimeException('参数（service）缺失！');
+                    }
+
+                    if (!isset($call['method'])) {
+                        throw new RuntimeException('参数（method）缺失！');
+                    }
+
+                    if (!isset($call['params'])) {
+                        throw new RuntimeException('参数（params）缺失！');
+                    }
+
+                    $service = $call['service'];
+                    $method = $call['method'];
+                    $params = $call['params'];
+
+                    $service = Be::getService($service);
+                    $result = $service->$method(...$params);
+                    $results[] = [
+                        'success' => true,
+                        'message' => '',
+                        'data' => $result
+                    ];
+                } catch (\Throwable $t) {
+                    //Be::getLog()->emergency($t);
+                    $results[] = [
+                        'success' => false,
+                        'message' => $t->getMessage(),
+                    ];
+                }
+            }
+            $server->send($fd, json_encode($results));
+            //$server->close($fd);
         });
 
         $this->swooleHttpServer->start();
