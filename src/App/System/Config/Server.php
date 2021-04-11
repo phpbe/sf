@@ -72,6 +72,6 @@ class Server
     /**
      * @BeConfigItem("启用 JSON RPC", driver="FormItemSwitch")
      */
-    public $jsonRpc = false;
+    public $jsonRpc = true;
 
 }

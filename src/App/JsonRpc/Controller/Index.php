@@ -68,7 +68,7 @@ class Index
         }
 
         $method = $inputArray['method'];
-        $methods = explode('.', $method);
+        $methods = explode('::', $method);
         if (count($methods) != 2) {
             return $this->error($id, static::ERR_METHOD);
         }
