@@ -29,7 +29,8 @@ class Index
         $request = Be::getRequest();
         $response = Be::getResponse();
 
-        $inputData = $request->json();
+        $inputData = $request->getRequest()->getContent();
+        $inputData = json_decode($inputData);
         if (!$inputData) {
             $response->end(json_encode($this->error(null, static::ERR_PARSE)));
             return;
