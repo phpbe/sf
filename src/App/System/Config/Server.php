@@ -8,28 +8,16 @@ class Server
 {
 
     /**
-     * @BeConfigItem("RPC 监听的IP地址", driver="FormItemInput")
-     */
-    public $rpc_host = '0.0.0.0';
-
-    /**
-     * @BeConfigItem("RPC 端口号",
-     *     driver="FormItemInputNumberInt",
-     *     ui="return [':min' => 1];")
-     */
-    public $rpc_port = 10240;
-
-    /**
      * @BeConfigItem("Http 监听的IP地址", driver="FormItemInput")
      */
-    public $http_host = '0.0.0.0';
+    public $host = '0.0.0.0';
 
     /**
      * @BeConfigItem("Http 端口号",
      *     driver="FormItemInputNumberInt",
      *     ui="return [':min' => 1];")
      */
-    public $http_port = 80;
+    public $port = 80;
 
     /**
      * @BeConfigItem("Http Reactor线程数",
