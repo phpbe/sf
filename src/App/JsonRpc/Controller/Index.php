@@ -79,6 +79,7 @@ class Index
             $function = $methods[1];
             $service = Be::getService($serviceName);
             $result = $service->$function(...$inputArray['params']);
+            if ($result) $result = false;
             return $this->success($id, $result);
         } catch (\Exception $e) {
             return $this->error($id, $e->getCode(), $e->getMessage());
