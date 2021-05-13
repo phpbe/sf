@@ -19,11 +19,7 @@
     }
   ],
   "require": {
-    "be/f": "^2.1",
-    "be/f-cache": "^2.1",
-    "be/f-db": "^2.1",
-    "be/f-lib": "^2.1",
-    "be/f-es": "^2.1"
+    "be/f": "^2.1"
   },
   "autoload": {
     "psr-4": {

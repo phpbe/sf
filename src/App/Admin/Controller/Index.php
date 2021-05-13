@@ -1,6 +1,6 @@
 <?php
 
-namespace Be\Sf\App\JsonRpc\Controller;
+namespace Be\Sf\App\Admin\Controller;
 
 
 use Be\F\App\ControllerException;
