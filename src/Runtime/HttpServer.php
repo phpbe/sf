@@ -176,7 +176,7 @@ class HttpServer
 
                 $class = 'Be\\Sf\\App\\' . $app . '\\Controller\\' . $controller;
                 if (!class_exists($class)) {
-                    throw new RuntimeException('Controller ' . $app . '/' . $controller . ' does not exist!');
+                    throw new RuntimeException('Controller ' . $app . '/' . $controller . ' doesn\'t exist!');
                 } else {
                     $instance = new $class();
                     if (method_exists($instance, $action)) {
