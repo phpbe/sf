@@ -16,12 +16,16 @@ class Index
     const ERR_INTERNAL = -32603;
     const ERR_SERVER = -32000;
 
+    private $configLog = null;
+
     public function __construct()
     {
         $configServer = Be::getConfig('System.Server');
         if (!$configServer->jsonRpc) {
             throw new ControllerException('JsonRpc 未启用');
         }
+
+        $this->configLog = Be::getConfig('JsonRpc.Log');
     }
 
     public function index()
@@ -29,8 +33,8 @@ class Index
         $request = Be::getRequest();
         $response = Be::getResponse();
 
-        $inputData = $request->getRequest()->getContent();
-        $inputData = json_decode($inputData);
+        $inputDataStr = $request->getRequest()->getContent();
+        $inputData = json_decode($inputDataStr);
         if (!$inputData) {
             $response->end(json_encode($this->error(null, static::ERR_PARSE)));
             return;
@@ -38,17 +42,37 @@ class Index
 
         if (is_array($inputData)) {
             $results = [];
+            $hasError = false;
             foreach ($inputData as $x) {
                 $result = $this->handle($x);
                 if ($result) {
                     $results[] = $result;
+                    if (isset($result['error'])) {
+                        $hasError = true;
+                    }
                 }
             }
 
-            $response->end(json_encode($results));
+            $resultsStr = json_encode($results);
+            if ($this->configLog->accessLog) {
+                Be::getService('JsonRpc.Log')->accessLog($inputDataStr, $resultsStr);
+            }
+
+            if ($this->configLog->errorLog && $hasError) {
+                Be::getService('JsonRpc.Log')->errorLog($inputDataStr, $resultsStr);
+            }
+            $response->end($resultsStr);
         } else {
             $result = $this->handle($inputData);
-            $response->end(json_encode($result));
+            $resultStr = json_encode($result);
+            if ($this->configLog->accessLog) {
+                Be::getService('JsonRpc.Log')->accessLog($inputDataStr, $resultStr);
+            }
+
+            if ($this->configLog->errorLog && isset($result['error'])) {
+                Be::getService('JsonRpc.Log')->errorLog($inputDataStr, $resultStr);
+            }
+            $response->end($resultStr);
         }
     }
 
