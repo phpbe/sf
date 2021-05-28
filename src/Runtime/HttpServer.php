@@ -4,6 +4,7 @@ namespace Be\Sf\Runtime;
 
 use Be\F\Config\ConfigFactory;
 use Be\F\Db\DbFactory;
+use Be\F\Gc;
 use Be\F\Redis\RedisFactory;
 use Be\F\Request\RequestFactory;
 use Be\F\Response\ResponseFactory;
@@ -167,7 +168,7 @@ class HttpServer
                         $controller = $routes[1];
                         $action = $routes[2];
                     } else {
-                        throw new RuntimeException('路由参数（' . $route . '）无法识别！');
+                        throw new RuntimeException('Route (' . $route . ') parse error!');
                     }
                 }
 
@@ -175,13 +176,13 @@ class HttpServer
 
                 $class = 'Be\\Sf\\App\\' . $app . '\\Controller\\' . $controller;
                 if (!class_exists($class)) {
-                    throw new RuntimeException('控制器 ' . $app . '/' . $controller . ' 不存在！');
+                    throw new RuntimeException('Controller ' . $app . '/' . $controller . ' does not exist!');
                 } else {
                     $instance = new $class();
                     if (method_exists($instance, $action)) {
                         $instance->$action();
                     } else {
-                        throw new RuntimeException('未定义的任务：' . $action);
+                        throw new RuntimeException('Undefined action ' . $action . ' of class ' . $class . '!');
                     }
                 }
 
@@ -190,7 +191,7 @@ class HttpServer
                 Be::getLog()->emergency($t);
             }
 
-            Be::release();
+            Gc::release(\Swoole\Coroutine::getuid());
             return true;
         });
 
