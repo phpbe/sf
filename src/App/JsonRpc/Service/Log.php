@@ -25,7 +25,7 @@ class Log
      */
     public function accessLog($requestStr, $responseStr)
     {
-        $path = Be::getRuntime()->getDataPath() . '/JsonRpc/access_log/' . date('Y-m/d');
+        $path = Be::getRuntime()->getDataPath() . '/JsonRpc/access_log/' . date('Y/m/d');
         $dir = dirname($path);
         if (!file_exists($dir)) {
             mkdir($dir, 0755, true);
@@ -49,7 +49,7 @@ class Log
      */
     public function errorLog($requestStr, $responseStr)
     {
-        $path = Be::getRuntime()->getDataPath() . '/JsonRpc/error_log/' . date('Y-m/d');
+        $path = Be::getRuntime()->getDataPath() . '/JsonRpc/error_log/' . date('Y/m/d');
         $dir = dirname($path);
         if (!file_exists($dir)) {
             mkdir($dir, 0755, true);
